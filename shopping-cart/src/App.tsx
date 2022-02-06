@@ -35,12 +35,40 @@ const App = () => {
   const getTotalItems = (items: CartItemType[]) =>
     items.reduce((acc: number, item) => acc + item.amount, 0);
 
-  const handleAddToCart = (clickedItem: CartItemType) => null;
+  const handleAddToCart = (clickedItem: CartItemType) => {
+    setCartItems((prev) => {
+      //1. check if item is already in the cart?
+      const isItemInCart = prev.find((item) => item.id === clickedItem.id);
 
-  const handleRemoveFromCart = () => null;
+      if (isItemInCart) {
+        return prev.map((item) =>
+          item.id === clickedItem.id
+            ? { ...item, amount: item.amount + 1 }
+            : item
+        );
+      }
+      //if this is the first time that the item is added
+      return [...prev, { ...clickedItem, amount: 1 }];
+    });
+  };
+
+  const handleRemoveFromCart = (id: number) => {
+    setCartItems((prev) =>
+      prev.reduce((acc, item) => {
+        //check if the id's match to know if it is the right one
+        if (item.id === id) {
+          //check the amount number so we either remove it completely or only subtract one
+          if (item.amount === 1) return acc;
+          return [...acc, { ...item, amount: item.amount - 1 }];
+        } else {
+          return [...acc, item];
+        }
+      }, [] as CartItemType[])
+    );
+  };
 
   if (isLoading) return <LinearProgress />;
-  if (error) return <div>Opps... Something went wrong</div>;
+  if (error) return <div>Oops... Something went wrong</div>;
 
   return (
     <Wrapper>
